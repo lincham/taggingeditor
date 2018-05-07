@@ -81,7 +81,6 @@ public class TaggingEditor {
 		
 		pNorth = Box.createHorizontalBox();//Box容器默认采用BoxLayout
 		sp = new JScrollPane();
-		//sp.setPreferredSize(new Dimension(width/2,height));
 		ta = new JTextArea();
 		ta.setPreferredSize(new Dimension(width/2,height));	
 		ta.setFont(new Font("微软雅黑",Font.PLAIN,16));//设置默认输入字体属性
@@ -177,6 +176,8 @@ public class TaggingEditor {
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
+					}finally {
+						
 					}
 				}
 			}
@@ -270,7 +271,7 @@ public class TaggingEditor {
 
 						String line = null;
 						while ((line = br.readLine()) != null) {
-							ta.append(line + "\r\n");// doc.insertString(doc.getLength(), line+"\r\n", null);//向文本区域写入内容
+							ta.append(line + "\r\n");//向文本区域写入内容
 						}
 						br.close();
 					} catch (IOException ex) {
@@ -310,10 +311,8 @@ public class TaggingEditor {
 			pp.setText(p.getProperty("pp"));
 			
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}finally {
 			try {
