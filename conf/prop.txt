@@ -1,0 +1,10 @@
+NP
+VP
+AP
+PP
+DP
+MP
+BP
+SP
+TP
+MBAR
