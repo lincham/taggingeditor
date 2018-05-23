@@ -114,8 +114,8 @@ public class TaggingEditor {
 		
 		openFile = new JButton("打开文件");
 		saveFile = new JButton("保存文件");
-		chunkParse = new JButton("解    析");
-		setProp = new JButton("标注更改");
+		//chunkParse = new JButton("解    析");
+		//setProp = new JButton("标注更改");
 		
 	
 		popMenu = new JPopupMenu();
@@ -164,10 +164,10 @@ public class TaggingEditor {
 		pNorth.add(saveFile);
 		pNorth.add(Box.createHorizontalStrut(80));
 		
-		pNorth.add(chunkParse);
-		pNorth.add(Box.createHorizontalStrut(80));
+		//pNorth.add(chunkParse);
+		//pNorth.add(Box.createHorizontalStrut(80));
 		
-		pNorth.add(setProp);
+		//pNorth.add(setProp);
 		
 		f.setJMenuBar(mb);		
 		f.add(pNorth,BorderLayout.NORTH);		
