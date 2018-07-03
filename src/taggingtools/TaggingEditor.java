@@ -50,7 +50,7 @@ import javax.swing.text.Document;
 
 
 public class TaggingEditor {
-	private JFrame f;////////
+	private JFrame f;///////////
 	private Box pNorth;//修改成Box
 	private JScrollPane sp;
 	private JTextArea ta;
