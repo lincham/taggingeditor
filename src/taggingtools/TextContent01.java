@@ -6,7 +6,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
 public class TextContent01 {
-	private PlainDocument pd;
+	private PlainDocument pd;////
 	LinkedList<String> list  = null;
 	public TextContent01(PlainDocument pd) {
 		this.pd = pd;
