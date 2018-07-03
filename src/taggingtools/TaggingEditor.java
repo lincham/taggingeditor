@@ -48,14 +48,15 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.Document;
 
 
+
 public class TaggingEditor {
 	private JFrame f;
 	private Box pNorth;//修改成Box
 	private JScrollPane sp;
 	private JTextArea ta;
 	private JMenuBar mb;
-	private JMenu model,edit,openFileItem;
-	private JMenuItem chunkTag, nerTag,newFileItem,exitItem,copyItem,pasteItem,conllItem,cBankItem;	
+	private JMenu model,edit,openFileItem,inputTag;
+	private JMenuItem chunkTag, nerTag,newFileItem,exitItem,copyItem,pasteItem,conllItem,cBankItem,forChunk,forNer;	
 	private JButton openFile,saveFile, chunkParse,setProp;
 	
 	private JPopupMenu popMenu;
@@ -98,19 +99,28 @@ public class TaggingEditor {
 		sp.setBounds(new Rectangle(width/2,height));
 		//ta.setPreferredSize(new Dimension(width/2,height));	
 		ta.setFont(new Font("微软雅黑",Font.PLAIN,16));//设置默认输入字体属性
-		ta.setLineWrap(true);
+		ta.setLineWrap(true);		
+		
 		mb = new JMenuBar();
 		model = new JMenu("模式选择");
 		edit = new JMenu("编辑");
-		//openFileItem = new JMenu("打开文件");
+		inputTag = new JMenu("导入标注方案");
+		openFileItem = new JMenu("打开文件");
+		
 		chunkTag = new JMenuItem("组块标记");
 		nerTag = new JMenuItem("命名实体标记");
 		exitItem = new JMenuItem("退出");
+		
 		newFileItem = new JMenuItem("新建");
 		copyItem = new JMenuItem("复制");
 		pasteItem = new JMenuItem("粘贴");
+		
 		conllItem = new JMenuItem("CoNLL");
 		cBankItem = new JMenuItem("ChunkBank");
+		
+		forChunk = new JMenuItem("导入组块标签");
+		forNer = new JMenuItem("导入ner标签");
+		
 		
 		openFile = new JButton("打开文件");
 		saveFile = new JButton("保存文件");
@@ -136,6 +146,7 @@ public class TaggingEditor {
 		for(int i =0 ;i<menuList.size();i++) {			
 			popMenu.add(menuList.get(i));
 		}
+		addListenerToPopup();
 		
 		ta.setComponentPopupMenu(popMenu);//为文本区域TextPane添加右键菜单，不用add方法+事件监听	
 		
@@ -143,7 +154,9 @@ public class TaggingEditor {
 		//添加菜单
 		mb.add(model);
 		mb.add(edit);
-		//mb.add(openFileItem);
+		mb.add(inputTag);
+		mb.add(openFileItem);
+		
 		model.add(chunkTag);
 		model.add(nerTag);
 		model.add(exitItem);
@@ -151,8 +164,12 @@ public class TaggingEditor {
 		edit.add(newFileItem);
 		edit.add(copyItem);
 		edit.add(pasteItem);
-		//openFileItem.add(conllItem);
-		//openFileItem.add(cBankItem);
+		
+		openFileItem.add(conllItem);
+		openFileItem.add(cBankItem);
+		
+		inputTag.add(forChunk);
+		inputTag.add(forNer);
 		
 		
 		//sp.setViewportView(ta);//向ScrollPane里添加JTextArea
@@ -185,36 +202,46 @@ public class TaggingEditor {
 	public void eventsResponse(){
 		
 		
-		//为修改属性文件的按钮添加监听
-		/*setProp.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent e) {
-				if (flag != 0 && flag != 1) {
-					JOptionPane.showMessageDialog(null,"文件有修改，请先保存！");					
-				}else {					
-					try {
-						file = new File("./conf/popupmenu.properties");
-						FileInputStream fis = new FileInputStream(file);
-						InputStreamReader isr = new InputStreamReader(fis);
-						BufferedReader br = new BufferedReader(isr);
-						String propStr = null;
-						while((propStr = br.readLine())!=null) {
-							ta.append(propStr+"\r\n");
-						}
-						br.close();
-						propChanged = true;
-												
-					} catch (FileNotFoundException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}finally {
-						
+		
+		
+		//为导入组块标注方案添加监听事件
+		forChunk.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e){
+				FileDialog openDia = new FileDialog(f, "打开文件", FileDialog.LOAD);
+				openDia.setVisible(true);			
+				String filePath = openDia.getDirectory();// 存储文件路径
+				String fileName = openDia.getFile(); // 存储文件名
+				
+				if (filePath == null || fileName == null) {// 是否选择了有效文件
+					return;
+				}
+				File inputFile = new File(filePath,fileName);
+				Scanner sc=null;
+				try {
+					sc = new Scanner(inputFile);
+					int number = popMenu.getComponentCount();
+					for(int i =0 ;i<number;i++) {	
+						popMenu.remove(menuList.get(i));
 					}
+					menuList.clear();//清空列表，用于存放新的标注方案
+					while(sc.hasNext()) {//读取新的标记方案
+						menuList.add(new JMenuItem(sc.nextLine()));
+					}
+					for(int i =0 ;i<menuList.size();i++) {			
+						popMenu.add(menuList.get(i));
+					}
+					JOptionPane.showMessageDialog(null, "导入成功！");
+					addListenerToPopup();
+					
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}finally {
+					if (sc!=null)
+						sc.close();
 				}
 			}
-		});*/
+		});
 		
 		//cBankItem设置监听
 		cBankItem.addActionListener(new ActionListener() {
@@ -286,7 +313,7 @@ public class TaggingEditor {
 		});
 		
 		//为右键菜单的各项添加监听器
-		for(int i = 0;i<menuList.size();i++) {	
+		/*for(int i = 0;i<menuList.size();i++) {	
 			JMenuItem popupHandle = menuList.get(i);
 			popupHandle.addMouseListener(new MouseAdapter (){
 				public void mousePressed(MouseEvent e){
@@ -298,7 +325,7 @@ public class TaggingEditor {
 				}
 				
 			});
-		}
+		}*/
 		
 		
 		//为保存文件添加事件监听
@@ -378,34 +405,21 @@ public class TaggingEditor {
 			}
 		});
 	}
-	
-	/*
-	 * 初始化鼠标右键菜单
-	 * */
-	/*private void setDefaultPopupMenu(){
-		File propFile = new File("./conf/popupmenu.properties");
-		FileInputStream pf = null;
-		try {
-			pf = new FileInputStream(propFile);
-			Properties p = new Properties();
-			p.load(pf);
-			np.setText(p.getProperty("np"));
-			vp.setText(p.getProperty("vp"));
-			pp.setText(p.getProperty("pp"));
-			
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}finally {
-			try {
-				if (pf!=null)
-					pf.close();
-			}catch(IOException e) {
-				
-			}
+	//为右键菜单设置监听器
+	private void addListenerToPopup() {
+		for(int i =0 ;i<menuList.size();i++) {
+			JMenuItem popupHandle = menuList.get(i);
+			popupHandle.addMouseListener(new MouseAdapter() {
+				public void mousePressed(MouseEvent e){
+					String selectedStr = ta.getSelectedText();
+					String tagStyle = popupHandle.getText();
+					if (selectedStr != null){
+						ta.replaceSelection("["+tagStyle+" "+selectedStr+"]");
+					}
+				}
+			});
 		}
-	}*/	
+	}		
 	
 	
 	//打开文件对话框
@@ -415,7 +429,7 @@ public class TaggingEditor {
 			JOptionPane.showMessageDialog(null, "文件已更改，请先保存！");
 		}else {
 			FileDialog openDia = new FileDialog(f, "打开文件", FileDialog.LOAD);
-			openDia.setVisible(true);
+			openDia.setVisible(true);			
 			String filePath = openDia.getDirectory();// 存储文件路径
 			String fileName = openDia.getFile(); // 存储文件名
 			
@@ -426,16 +440,17 @@ public class TaggingEditor {
 		}
 		return fullName;
 	}
+	
 	//转换ChunkBank格式的文件
 	private String readChunkBank() {
 		StringBuilder formattedText = new StringBuilder();
-		for (int i = 0;i<list.size() ;++i )
+		for (int i = 0;i<list.size() ;++i)
 		{
 			String  s = list.get(i);
 			if (s.contains("["))//匹配中括号
 			{
 				int k = formattedText.length();//记录"["的索引，后面插入组块的tag
-				formattedText.append(s);
+				formattedText.append(s+" ");
 				for (int j = i+1 ;j<list.size() ;++j )//从list[i]往后遍历寻找该组块的结束标记
 				{					
 					String str = list.get(j);
@@ -447,7 +462,7 @@ public class TaggingEditor {
 						i=j;
 						break;//找到组块的结束标记后就跳出该层循环
 					}else
-						formattedText.append(" "+str+" ");//该集合元素中没有包含组块的结束标记符（即"]"）,直接添加到字符串的结尾
+						formattedText.append(str+" ");//该集合元素中没有包含组块的结束标记符（即"]"）,直接添加到字符串的结尾
 				}
 				
 			}else {//没有包含中括号（"["）则直接添加到字符串后面
@@ -466,18 +481,21 @@ public class TaggingEditor {
 			if(i%3==2)	{
 				String str = list.get(i);
 				if(str.charAt(0)=='B') {										
-					formattedText.append("["+str.substring(2, str.length())+" "+list.get(i-2)+"/"+list.get(i-1)+" "+"]");
+					formattedText.append(" ["+str.substring(2, str.length())+" "+list.get(i-2)+"/"+list.get(i-1)+"]");
 					}
 				if (str.charAt(0)=='I') {
-					formattedText.insert(formattedText.length()-1,list.get(i-2)+"/"+list.get(i-1)+" ");
+					formattedText.insert(formattedText.length()-1," "+list.get(i-2)+"/"+list.get(i-1));
 					}
 				if(str.charAt(0)=='O') {
-					formattedText.insert(formattedText.length()-1,list.get(i-2)+"/"+list.get(i-1)+" ");																}
+					//formattedText.insert(formattedText.length()-1,list.get(i-2)+"/"+list.get(i-1)+" ");																}
+					formattedText.append(" "+list.get(i-2)+"/"+list.get(i-1));
 				}
 				}
+		}
 		list.clear();
 		return formattedText.toString();
 	}
+		
 	
 	//读取文件
 	private void read(String fileName) {
